@@ -14,8 +14,10 @@ contract MerkleAirdrop {
     // merkle proofs
     bytes32 private immutable i_merkleRoot;
     IERC20 private immutable i_airdropToken;
+    mapping(address claimer => bool claimed) private s_hasClaimed;
 
     error MerkleAirdrop__InvalidProof();
+    error MerkleAirdrop__AlreadyClaimed();
 
     constructor(bytes32 merkleRoot, IERC20 airdropToken) {
         i_merkleRoot = merkleRoot;
@@ -23,6 +25,9 @@ contract MerkleAirdrop {
     }
 
     function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external {
+        if (s_hasClaimed[account]) {
+            revert MerkleAirdrop__AlreadyClaimed();
+        }
         // calculate using the account and the amount, the hash -> leaf node
         // Double-hashing pattern: First hash encodes the data, second hash ensures leaf nodes
         // have the same format as internal nodes (prevents second preimage attacks)
@@ -32,6 +37,9 @@ contract MerkleAirdrop {
             revert MerkleAirdrop__InvalidProof();
         }
 
+        // Following Checks-Effects-Interactions pattern; if transfer fails, the transaction reverts
+        // and this state change is rolled back due to SafeERC20's revert behavior
+        s_hasClaimed[account] = true;
         emit Claimed(account, amount);
         i_airdropToken.safeTransfer(account, amount);
     }
