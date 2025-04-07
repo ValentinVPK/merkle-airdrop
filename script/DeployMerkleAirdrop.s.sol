@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
 import {MerkleAirdrop} from "../src/MerkleAirdrop.sol";
-import {KettlebellToken} from "../src/KettleBellToken.sol";
+import {KettlebellToken} from "../src/KettlebellToken.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract DeployMerkleAirdrop is Script {
